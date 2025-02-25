@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solmindr - Neural Networks on Solana</title>
+    <style>
+        :root {
+            --primary: #6e57e0;
+            --secondary: #fc5c7d;
+            --dark: #121212;
+            --light: #f8f9fa;
+            --success: #00f5d4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .cta-button {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+        }
+        
+        .hero {
+            padding: 100px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            width: 80%;
+            height: 400px;
+            background: radial-gradient(circle, rgba(110, 87, 224, 0.2), transparent 70%);
+            filter: blur(60px);
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .hero h1 {
+            font-size: 62px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 600px;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .features {
+            padding: 100px 0;
+            position: relative;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .feature-icon {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .blockchain-visual {
+            margin: 80px 0;
+            position: relative;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(110, 87, 224, 0.6);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(110, 87, 224, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(110, 87, 224, 0);
+            }
+        }
+        
+        .neuron {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(110, 87, 224, 0.5);
+        }
+        
+        .synapse {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform-origin: left center;
+        }
+        
+        .testimonials {
+            padding: 100px 0;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .testimonial-slider {
+            margin-top: 50px;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 30px;
+            padding: 20px 0;
+            scrollbar-width: none;
+        }
+        
+        .testimonial-slider::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .testimonial-card {
+            scroll-snap-align: start;
+            min-width: 350px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .author-details h4 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .author-details p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .cta-section p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            color: var(--light);
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .secondary-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        footer {
+            padding: 60px 0;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .footer-desc {
+            max-width: 300px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+        
+        .footer-links h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .copyright {
+            margin-top: 60px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+        
+        /* Animation for neural network visualization */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 42px;
+            }
+            
+            .blockchain-visual {
+                height: 300px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">
+                <span class="logo-icon">⟠</span>
+                <span>Solmindr</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#testimonials">Testimonials</a>
+                <a href="#pricing">Pricing</a>
+            </div>
+            <button class="cta-button">Launch App</button>
+        </nav>
+        
+        <section class="hero">
+            <div class="hero-bg"></div>
+            <h1>Neural Networks Meet Blockchain</h1>
+            <p>Solmindr combines the power of AI with Solana's high-speed blockchain to create decentralized intelligence that learns, adapts, and rewards.</p>
+            <button class="cta-button">Get Started</button>
+        </section>
+        
+        <section class="features" id="features">
+            <div class="section-title">
+                <h2>Unique Features</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Neuro-Mining</h3>
+                    <p>Train AI models and earn SOL tokens. Your computational power helps improve the network while generating passive income through our revolutionary Proof-of-Thought consensus mechanism.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔮</div>
+                    <h3>Predictive Staking</h3>
+                    <p>Our AI analyzes market patterns to optimize your staking rewards. Get up to 24% higher yields with dynamic reallocation based on neural prediction models.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Memory Pools</h3>
+                    <p>Store and retrieve neural network weights on-chain with our distributed memory system. Your AI models remain accessible, immutable, and can be monetized through our marketplace.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Cognitive Security</h3>
+                    <p>Our AI-powered defense system identifies and neutralizes threats before they materialize. Solmindr's neural guardrails protect your assets with predictive threat detection.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Thought NFTs</h3>
+                    <p>Mint your AI models' insights as unique NFTs. Each breakthrough your network achieves can be captured, owned, and traded on our specialized marketplace.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Neural DAOs</h3>
+                    <p>Create decentralized autonomous organizations guided by AI. Set parameters and let your DAO learn and evolve, making decisions based on collective intelligence.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="how-it-works" id="how-it-works">
+            <div class="section-title">
+                <h2>How Solmindr Works</h2>
+            </div>
+            <div class="blockchain-visual">
+                <!-- Neural network nodes and connections will be added with JavaScript -->
+            </div>
+        </section>
+        
+        <section class="testimonials" id="testimonials">
+            <div class="section-title">
+                <h2>What Our Users Say</h2>
+            </div>
+            <div class="testimonial-slider">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"I've increased my SOL holdings by 37% in just three months using Solmindr's Predictive Staking. The AI recommendations have been remarkably accurate!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MK</div>
+                        <div class="author-details">
+                            <h4>Michael K.</h4>
+                            <p>DeFi Investor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"As a machine learning engineer, I've been looking for ways to monetize my models. Solmindr's Memory Pools let me deploy my algorithms on-chain and earn passive income."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SJ</div>
+                        <div class="author-details">
+                            <h4>Sarah J.</h4>
+                            <p>ML Engineer</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Our DAO has been using Solmindr's neural governance tools for six months. The AI-suggested proposals have outperformed human-created ones by 28% in terms of treasury growth."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">DR</div>
+                        <div class="author-details">
+                            <h4>David R.</h4>
+                            <p>DAO Contributor</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"I minted my first Thought NFT last month after my model predicted a market correction. Sold it for 45 SOL right after the prediction came true!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AP</div>
+                        <div class="author-details">
+                            <h4>Alex P.</h4>
+                            <p>NFT Creator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta-section">
+            <h2>Start Your Neural Journey Today</h2>
+            <p>Join thousands of users leveraging the power of AI and Solana to reimagine what's possible in decentralized finance.</p>
+            <div class="cta-buttons">
+                <button class="cta-button">Create Account</button>
+                <button class="secondary-button">Watch Demo</button>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">Solmindr</div>
+                    <p class="footer-desc">Bridging neural networks with Solana's blockchain for a smarter, faster, and more rewarding decentralized future.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Products</h3>
+                    <ul>
+                        <li><a href="#">Neuro-Mining</a></li>
+                        <li><a href="#">Predictive Staking</a></li>
+                        <li><a href="#">Memory Pools</a></li>
+                        <li><a href="#">Thought NFTs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 Solmindr. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Create neural network visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            const visualContainer = document.querySelector('.blockchain-visual');
+            const containerWidth = visualContainer.offsetWidth;
+            const containerHeight = visualContainer.offsetHeight;
+            
+            // Create nodes
+            const nodeCount = 5;
+            const nodes = [];
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.textContent = 'AI';
+                
+                const x = Math.random() * (containerWidth - 100) + 50;
+                const y = Math.random() * (containerHeight - 100) + 50;
+                
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                node.style.animationDelay = `${i * 0.5}s`;
+                
+                visualContainer.appendChild(node);
+                nodes.push({element: node, x, y});
+            }
+            
+            // Create connections between nodes
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const synapse = document.createElement('div');
+                    synapse.className = 'synapse';
+                    
+                    const x1 = nodes[i].x + 30;
+                    const y1 = nodes[i].y + 30;
+                    const x2 = nodes[j].x + 30;
+                    const y2 = nodes[j].y + 30;
+                    
+                    const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                    
+                    synapse.style.width = `${length}px`;
+                    synapse.style.left = `${x1}px`;
+                    synapse.style.top = `${y1}px`;
+                    synapse.style.transform = `rotate(${angle}deg)`;
+                    
+                    visualContainer.appendChild(synapse);
+                }
+            }
+            
+            // Create floating neurons
+            const neuronCount = 15;
+            
+            for (let i = 0; i < neuronCount; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                
+                const x = Math.random() * containerWidth;
+                const y = Math.random() * containerHeight;
+                
+                neuron.style.left = `${x}px`;
+                neuron.style.top = `${y}px`;
+                neuron.style.animation = `float ${3 + Math.random() * 2}s infinite alternate`;
+                neuron.style.animationDelay = `${i * 0.2}s`;
+                
+                visualContainer.appendChild(neuron);
+            }
+        });
+        
+        // Make testimonial slider draggable
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.querySelector('.testimonial-slider');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                slider.style.cursor = 'grabbing';
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+            });
+
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+            });
+
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
+        });
+    </script>
+</body>
+</html>
